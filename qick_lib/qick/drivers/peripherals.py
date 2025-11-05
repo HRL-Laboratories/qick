@@ -782,6 +782,15 @@ class QICK_XTalk_Compensation(SocIP):
         value = value / fraction_multiplication
         return value
 
+    def bin_to_dec_pad(self, binary, dw):
+        fraction_multiplication = pow(2,(dw-1))
+        value = int(binary, 2)
+        # Adjust for two's complement if necessary
+        if value >= (1 << (dw - 1)):
+            value = int(binary[32-dw:], 2) - (1 << dw)
+        value = value / fraction_multiplication
+        return value
+
     def dec_to_bin(self, value, dw):
         fraction_multiplication = pow(2,(dw-1))
         if value < 0:
@@ -888,6 +897,29 @@ class QICK_XTalk_Compensation(SocIP):
             dt_int_bin = self.dec_to_bin(dt, dw)
             dt_int_32  = int(dt_int_bin, 2)
             self.k10   = dt_int_32
+
+    def set_k(self, dt, k_val):
+        if (dt > 1) or (dt < -1):
+            raise RuntimeError('K parameter should be less than 1 (1, -1) current Value : %d' % (dt))
+        else:
+            dw = self.cfg['coeff_dw']
+            dt_int_bin = self.dec_to_bin(dt, dw)
+            dt_int_32  = int(dt_int_bin, 2)
+            setattr(self, k_val, dt_int_32)
+
+    def axi_regs_dict(self):
+        reg_dict = {}
+        dw = self.cfg['coeff_dw']
+        for xreg in self.REGISTERS.keys():
+            xreg_dict = {}
+            reg_num = getattr(self, xreg)
+            xreg_dict['reg_num'] = reg_num
+            regbin = format(reg_num, f'0{dw}b')
+            dec = self.bin_to_dec_pad(regbin, dw)
+            xreg_dict['reg_dec'] = dec
+            xreg_dict['reg_bin'] = '{:039_b}'.format(reg_num)
+            reg_dict[xreg] = xreg_dict
+        return reg_dict
 
     def print_axi_regs(self):
         print('---------------------------------------------')

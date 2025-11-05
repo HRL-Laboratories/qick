@@ -2554,3 +2554,24 @@ class RFQickSoc216V1(RFQickSoc):
 
     def cleanup_round(self):
         self.clear_interrupts()
+
+class XtalkSoc(RFQickSoc216V1):
+    """ Inherits RFQickSoc216V1 and adds methods for getting and setting crosstalk matrix parameters """
+
+    def _get_xtalk(self, victim_ch):
+        """ get crosstalk ip block """
+        blockname = "signal_gen_wrapper/xtalk_wrapper/qick_xtalk_" + str(victim_ch)
+        xtalk = self._get_block(blockname)
+        return xtalk
+    
+    def set_xtalk(self, victim_ch, perp_ch, xtalk_val):
+        """ Set crosstalk matrix element.  Channel numbers start with channel 5, values here can be 0-10. perp_ch takes values 1-10. """
+        xtalk_obj = self._get_xtalk(victim_ch)
+        k_val = "k" + str(perp_ch)
+        xtalk_obj.set_k(xtalk_val, k_val)
+    
+    def get_xtalk_dict(self, victim_ch):
+        """ print a dictionary of crosstalk matrix elements corresponding to the given channel """
+        xtalk_obj = self._get_xtalk(victim_ch)
+        d = xtalk_obj.axi_regs_dict()
+        return d
