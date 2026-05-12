@@ -30,7 +30,7 @@ def bitfile_path():
     str
         absolute path to the firmware bitfile distributed with the QICK library
     """
-    board2file =  {'ZCU216' :'qick_216.bit',
+    board2file =  {'ZCU216' :'qick_216_rfbv2.bit',
             'ZCU111' :'qick_111.bit',
             'RFSoC4x2' :'qick_4x2.bit'}
     filename = board2file[os.environ['BOARD']]
