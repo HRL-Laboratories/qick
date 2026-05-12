@@ -75,7 +75,4 @@ Temporary Items
 !/.gitignore
 !/README.md
 
-.vscode/
-*.tmp
-*.cache/
-*.hw/
+.vscode
